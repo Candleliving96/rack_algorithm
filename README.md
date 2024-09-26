@@ -1,4 +1,6 @@
 # rack_algorithm
+Note: Code is currently a bit messy and difficult to follow. I am currently working on cleaning it up and adding descriptive comments/function contracts.
+
 The problem:
 
 A researcher at a local hospital expressed to me their desire for an automated rack distribution algorithm. They frequently receive data about a large amount of racks (~700) at a time, each of which contain anywhere from 1 to 95 samples. Typically, the number of racks containing each sample number increases as the sample number decreases - so there are hundreds of 1-sample racks, slightly fewer 2-sample racks, fewer 3-sample racks, etc. By the time it gets to 30-sample racks, the number of racks containing that sample frequency is very low. Their task is to combine these lower-sample racks into other racks that are as full as possible (a full rack has 96), while also minimizing the number of batches it takes. These batches must consist of 20 racks or less, which means they could combine 19 "source" racks into 1 "destination" rack, 18 "source" racks into 2 "destination" racks, etc.
