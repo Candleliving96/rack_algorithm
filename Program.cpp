@@ -96,18 +96,23 @@ void Program::distribute_racks() {
 * notes: only use when less than 19 sources are left to be distributed
 */
 void Program::distribute_remainder() {
-    //reset testing array
-    testing_array.clear();
+    //continue making new batches until there are no more sources left
+    while (all_sources.size() > 0) {
+        //reset testing array
+        testing_array.clear();
 
-    //add all remaining sources to batch
-    for (auto it: sample_frequencies) {
-        int amount_to_add = it.second;
-        for (int i = 0; i < it.second; i++) {
-            add_in_order(testing_array, it.first);
+        int sum = 0;
+        for (int i = 0; i < all_sources.size(); i++) {
+            sum += all_sources.at(i).num_samples;
+            //i is the number of sources currently, so check if the sum surpasses the number of spots in the destination racks
+            if (sum > (20 - i) * 96) {
+                break;
+            }
+            testing_array.push_back(all_sources.at(i).num_samples);
         }
+        //finalize spots by adding source racks to a new Batch, removing the source racks from all_sources, and pushing that Batch back
+        finished_batches.push_back(finalize_spots());
     }
-    //finalize spots by adding source racks to a new Batch and pushing that Batch back
-    finished_batches.push_back(finalize_spots());
 }
 
 /*
@@ -381,19 +386,16 @@ void Program::print_summary() {
             cout << "-- Batch number " << i + 1 << " --" << endl;
             cout << "Number of sources in this batch: " << finished_batches.at(i).batch_sources.size() << endl;
 
-            int num_destinations;
-            if (finished_batches.at(i).batch_sources.size() == 18 || finished_batches.at(i).batch_sources.size() == 19) {
-                num_destinations = 20 - finished_batches.at(i).batch_sources.size();
-            }
-            else {
-                num_destinations = 1;
-            }
-            cout << "Number of destinations in this batch: " << num_destinations << endl; // FIX LAST BATCH
-
             int total_spots_filled = 0;
             for (int k = 0; k < finished_batches.at(i).batch_sources.size(); k++) {
                 total_spots_filled += finished_batches.at(i).batch_sources.at(k).num_samples;
             }
+
+            int num_destinations = total_spots_filled / 96;
+            if (total_spots_filled % 96 != 0) {
+                num_destinations++;
+            }
+            cout << "Number of destinations in this batch: " << num_destinations << endl;
             cout << "Number of spots filled in destination racks: " << total_spots_filled << endl;
         }
         cout << endl;
